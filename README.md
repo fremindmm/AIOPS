@@ -1,4 +1,4 @@
-# AIOPS - 智能运维平台
+# 真AIOPS - AI时代真智能运维平台
 > 让运维更智能，让故障定位像做选择题一样简单
 
 [![Python Version](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
