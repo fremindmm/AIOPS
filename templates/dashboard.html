@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIOPS 智能运维平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 380px;
+            gap: 20px;
+            padding: 20px 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #eee;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 服务列表 */
+        .service-list {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        .service-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .service-item:hover {
+            background: #f8f9fa;
+        }
+
+        .service-item.active {
+            background: #e8f4fd;
+            border-left: 3px solid #3498db;
+        }
+
+        .service-item.warning {
+            border-left: 3px solid #f39c12;
+            background: #fef9e7;
+        }
+
+        .service-item.critical {
+            border-left: 3px solid #e74c3c;
+            background: #fdedec;
+        }
+
+        .service-name {
+            font-weight: 500;
+        }
+
+        .service-importance {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+
+        .service-importance.critical {
+            background: #fdedec;
+            color: #e74c3c;
+        }
+
+        .service-importance.important {
+            background: #fef9e7;
+            color: #f39c12;
+        }
+
+        /* 指标面板 */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .metric-value.warning {
+            color: #f39c12;
+        }
+
+        .metric-value.critical {
+            color: #e74c3c;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+
+        .metric-bar {
+            height: 4px;
+            background: #ecf0f1;
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .metric-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        .metric-bar-fill.ok {
+            background: #27ae60;
+        }
+
+        .metric-bar-fill.warning {
+            background: #f39c12;
+        }
+
+        .metric-bar-fill.critical {
+            background: #e74c3c;
+        }
+
+        /* 告警面板 */
+        .alert-panel {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        .alert-item {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #e74c3c;
+            background: #fdedec;
+        }
+
+        .alert-item.warning {
+            border-left-color: #f39c12;
+            background: #fef9e7;
+        }
+
+        .alert-item.info {
+            border-left-color: #3498db;
+            background: #e8f4fd;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .alert-id {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .alert-severity {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #e74c3c;
+            color: white;
+        }
+
+        .alert-severity.high {
+            background: #e67e22;
+        }
+
+        .alert-severity.medium {
+            background: #f39c12;
+        }
+
+        .alert-message {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .alert-time {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 8px;
+        }
+
+        /* 根因分析面板 */
+        .cause-panel {
+            padding: 0;
+        }
+
+        .cause-section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cause-section:last-child {
+            border-bottom: none;
+        }
+
+        .cause-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cause-title::before {
+            content: "";
+            width: 4px;
+            height: 16px;
+            background: #3498db;
+            border-radius: 2px;
+        }
+
+        .cause-content {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .cause-highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 13px;
+        }
+
+        .cause-author {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .cause-file {
+            color: #3498db;
+        }
+
+        /* 决策选项 */
+        .decision-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .decision-option {
+            padding: 16px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .decision-option:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .decision-option.recommended {
+            border-color: #27ae60;
+            background: #e8f8f0;
+        }
+
+        .decision-option.recommended::after {
+            content: "推荐";
+            background: #27ae60;
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+
+        .option-label {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .option-desc {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .option-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        .option-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Copilot 面板 */
+        .copilot-panel {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .copilot-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .copilot-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .copilot-title {
+            font-weight: 600;
+        }
+
+        .copilot-subtitle {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .copilot-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .copilot-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .copilot-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .suggestion-chip {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* 业务感知标签 */
+        .business-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+
+        .business-tag.critical {
+            background: #fdedec;
+            color: #e74c3c;
+        }
+
+        .business-tag.warning {
+            background: #fef9e7;
+            color: #f39c12;
+        }
+
+        .business-tag.info {
+            background: #e8f4fd;
+            color: #3498db;
+        }
+
+        /* 场景按钮 */
+        .scenario-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .scenario-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .scenario-btn:hover {
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        .scenario-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        /* 执行按钮 */
+        .execute-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .execute-btn.auto {
+            background: #27ae60;
+            color: white;
+        }
+
+        .execute-btn.auto:hover {
+            background: #219a52;
+        }
+
+        .execute-btn.manual {
+            background: #3498db;
+            color: white;
+        }
+
+        .execute-btn.manual:hover {
+            background: #2980b9;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+        }
+
+        /* 动画 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div>
+            <h1>AIOPS 智能运维平台</h1>
+            <div class="subtitle">智能告警 | 根因分析 | 自动修复 | 业务感知</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="refreshAll()">刷新数据</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- 左侧：服务列表 -->
+        <div class="card">
+            <div class="card-header">
+                <span>服务状态</span>
+                <span style="font-size: 12px; color: #95a5a6;">实时监控</span>
+            </div>
+            <div class="card-body">
+                <div class="service-list" id="serviceList">
+                    <!-- 服务列表将通过JS渲染 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 中间：主面板 -->
+        <div>
+            <!-- 指标面板 -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <span>实时指标</span>
+                    <span class="scenario-buttons">
+                        <button class="scenario-btn active" onclick="setScenario('db_oom')">数据库OOM</button>
+                        <button class="scenario-btn" onclick="setScenario('high_cpu')">CPU飙升</button>
+                        <button class="scenario-btn" onclick="setScenario('oom')">内存溢出</button>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="metrics-grid" id="metricsGrid">
+                        <!-- 指标卡片将通过JS渲染 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 根因分析面板 -->
+            <div class="card">
+                <div class="card-header">
+                    <span>根因分析</span>
+                    <span style="font-size: 12px; color: #95a5a6;">智能诊断</span>
+                </div>
+                <div class="card-body cause-panel" id="causePanel">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">点击触发告警开始分析</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copilot -->
+            <div class="copilot-panel">
+                <div class="copilot-header">
+                    <div class="copilot-icon">🤖</div>
+                    <div>
+                        <div class="copilot-title">AI 助手</div>
+                        <div class="copilot-subtitle">我是你的运维Copilot，有什么可以帮忙？</div>
+                    </div>
+                </div>
+                <input type="text" class="copilot-input" placeholder="输入问题，如：帮我分析昨晚的支付服务故障"
+                       id="copilotInput" onkeypress="handleCopilotKeypress(event)">
+                <div class="copilot-suggestions">
+                    <div class="suggestion-chip" onclick="askCopilot('帮我分析昨晚的支付服务故障')">昨晚的支付服务故障</div>
+                    <div class="suggestion-chip" onclick="askCopilot('上周的可用性如何')">上周的可用性</div>
+                    <div class="suggestion-chip" onclick="askCopilot('生成周报')">生成周报</div>
+                    <div class="suggestion-chip" onclick="askCopilot('order_service 状态')">order_service 状态</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：告警和决策 -->
+        <div>
+            <!-- 告警列表 -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <span>活跃告警</span>
+                    <span style="font-size: 12px; color: #e74c3c;" class="pulse">●</span>
+                </div>
+                <div class="card-body alert-panel" id="alertList">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛡️</div>
+                        <div class="empty-state-text">系统运行正常，暂无告警</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 决策建议 -->
+            <div class="card">
+                <div class="card-header">
+                    <span>决策建议</span>
+                    <span style="font-size: 12px; color: #95a5a6;">智能推荐</span>
+                </div>
+                <div class="card-body" id="decisionPanel">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <div class="empty-state-text">选择方案执行自动修复</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScenario = 'db_oom';
+        let selectedAlert = null;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshAll();
+            setInterval(refreshMetrics, 5000);
+        });
+
+        // 设置场景
+        function setScenario(scenario) {
+            currentScenario = scenario;
+            document.querySelectorAll('.scenario-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(getScenarioName(scenario))) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function getScenarioName(scenario) {
+            const names = {
+                'db_oom': '数据库OOM',
+                'high_cpu': 'CPU飙升',
+                'oom': '内存溢出'
+            };
+            return names[scenario] || scenario;
+        }
+
+        // 刷新所有数据
+        async function refreshAll() {
+            await Promise.all([
+                refreshServices(),
+                refreshMetrics(),
+                refreshAlerts()
+            ]);
+        }
+
+        // 刷新服务列表
+        async function refreshServices() {
+            try {
+                const response = await fetch('/api/services');
+                const data = await response.json();
+
+                const listHtml = data.services.map(svc => {
+                    const status = getServiceStatus(svc);
+                    return `
+                        <div class="service-item ${status}" onclick="selectService('${svc.name}')">
+                            <div>
+                                <div class="service-name">${svc.name}</div>
+                                <div class="service-importance ${svc.importance}">${getImportanceLabel(svc.importance)}</div>
+                            </div>
+                            <span style="font-size: 20px;">${status === 'critical' ? '🔴' : status === 'warning' ? '🟡' : '🟢'}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('serviceList').innerHTML = listHtml;
+            } catch (e) {
+                console.error('Failed to fetch services:', e);
+            }
+        }
+
+        function getServiceStatus(svc) {
+            // 模拟状态逻辑
+            if (svc.name === 'order_service' && currentScenario === 'db_oom') return 'critical';
+            if (svc.name === 'payment_service' && currentScenario === 'high_cpu') return 'warning';
+            if (svc.name === 'recommendation_service' && currentScenario === 'oom') return 'critical';
+            return 'ok';
+        }
+
+        function getImportanceLabel(importance) {
+            const labels = {
+                'critical': '核心服务',
+                'important': '重要服务',
+                'normal': '一般服务',
+                'low': '非核心'
+            };
+            return labels[importance] || importance;
+        }
+
+        function selectService(name) {
+            document.querySelectorAll('.service-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.service-item').classList.add('active');
+        }
+
+        // 刷新指标
+        async function refreshMetrics() {
+            try {
+                const response = await fetch('/api/metrics');
+                const data = await response.json();
+
+                const gridHtml = Object.entries(data.services).map(([svc, metrics]) => {
+                    const cpu = metrics.cpu_usage;
+                    const mem = metrics.memory_usage;
+                    const conn = metrics.db_connections;
+
+                    const cpuClass = cpu.status;
+                    const memClass = mem.status;
+                    const connClass = conn.status;
+
+                    return `
+                        <div class="metric-card">
+                            <div class="metric-value ${cpuClass}">${cpu.value}${cpu.unit}</div>
+                            <div class="metric-label">CPU 使用率</div>
+                            <div class="metric-bar">
+                                <div class="metric-bar-fill ${cpuClass}" style="width: ${Math.min(cpu.value, 100)}%"></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value ${memClass}">${mem.value}${mem.unit}</div>
+                            <div class="metric-label">内存使用率</div>
+                            <div class="metric-bar">
+                                <div class="metric-bar-fill ${memClass}" style="width: ${Math.min(mem.value, 100)}%"></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value ${connClass}">${conn.value}${conn.unit}</div>
+                            <div class="metric-label">数据库连接</div>
+                            <div class="metric-bar">
+                                <div class="metric-bar-fill ${connClass}" style="width: ${Math.min(conn.value, 100)}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('metricsGrid').innerHTML = gridHtml;
+            } catch (e) {
+                console.error('Failed to fetch metrics:', e);
+            }
+        }
+
+        // 刷新告警
+        async function refreshAlerts() {
+            try {
+                const response = await fetch('/api/alerts');
+                const data = await response.json();
+
+                if (data.alerts.length === 0) {
+                    document.getElementById('alertList').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🛡️</div>
+                            <div class="empty-state-text">系统运行正常，暂无告警</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const alertHtml = data.alerts.map(alert => `
+                    <div class="alert-item ${alert.severity === 'critical' ? 'critical' : alert.severity === 'high' ? 'warning' : 'info'}">
+                        <div class="alert-header">
+                            <span class="alert-id">${alert.alert_id}</span>
+                            <span class="alert-severity ${alert.severity}">${alert.severity.toUpperCase()}</span>
+                        </div>
+                        <div class="alert-message">${alert.message}</div>
+                        <div class="alert-time">${new Date(alert.timestamp).toLocaleString()}</div>
+                    </div>
+                `).join('');
+
+                document.getElementById('alertList').innerHTML = alertHtml;
+            } catch (e) {
+                console.error('Failed to fetch alerts:', e);
+            }
+        }
+
+        // 触发告警分析
+        async function triggerAlert() {
+            const serviceMap = {
+                'db_oom': 'order_service',
+                'high_cpu': 'payment_service',
+                'oom': 'recommendation_service'
+            };
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        alert_type: currentScenario,
+                        service: serviceMap[currentScenario]
+                    })
+                });
+
+                const result = await response.json();
+                selectedAlert = result;
+
+                // 渲染根因分析
+                renderCauseAnalysis(result);
+
+                // 渲染决策建议
+                renderDecision(result);
+
+                // 刷新告警列表
+                refreshAlerts();
+
+            } catch (e) {
+                console.error('Failed to analyze:', e);
+            }
+        }
+
+        function renderCauseAnalysis(result) {
+            const panel = document.getElementById('causePanel');
+
+            if (!result.root_cause) {
+                panel.innerHTML = `
+                    <div class="cause-section">
+                        <div class="cause-title">分析结果</div>
+                        <div class="cause-content">
+                            未能定位到明确的根因，建议人工介入排查。
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const cause = result.root_cause;
+
+            panel.innerHTML = `
+                <div class="cause-section">
+                    <div class="cause-title">问题定位</div>
+                    <div class="cause-content">
+                        ${result.alert.symptom}，检测到 <span class="cause-author">${cause.author}</span>
+                        在 <span class="cause-file">${cause.file_path}:${cause.line_number}</span> 的变更：
+                        <br><br>
+                        <span class="cause-highlight">${cause.description}</span>
+                    </div>
+                    <div class="business-tag critical">
+                        ⚠️ 置信度：${(cause.confidence * 100).toFixed(0)}%
+                    </div>
+                </div>
+
+                <div class="cause-section">
+                    <div class="cause-title">解决方案</div>
+                    <div class="cause-content">${cause.solution}</div>
+                </div>
+
+                <div class="cause-section">
+                    <div class="cause-title">影响范围</div>
+                    <div class="cause-content">
+                        受影响服务：${cause.related_services.join(' → ')}
+                    </div>
+                    <div class="business-tag warning">
+                        🔔 建议升级至：${result.escalation.escalation_contact || '值班工程师'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDecision(result) {
+            const panel = document.getElementById('decisionPanel');
+            const decision = result.decision;
+
+            const optionsHtml = decision.options.map((opt, idx) => `
+                <div class="decision-option ${idx === 0 ? 'recommended' : ''}" onclick="executeAction('${opt.label.split('.')[0]}', ${opt.auto_executable})">
+                    <div class="option-label">${opt.label}</div>
+                    <div class="option-desc">${opt.description}</div>
+                    <div class="option-meta">
+                        <span>✅ 成功率: ${(opt.success_rate * 100).toFixed(0)}%</span>
+                        <span>⚠️ 风险: ${opt.risk_level}</span>
+                        <span>⏱️ ${opt.estimated_downtime}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            panel.innerHTML = `
+                <div style="margin-bottom: 16px; font-size: 14px; color: #666;">
+                    ${decision.reasoning}
+                </div>
+                <div class="decision-options">
+                    ${optionsHtml}
+                </div>
+            `;
+        }
+
+        // 执行动作
+        async function executeAction(option, autoExecutable) {
+            const alertId = selectedAlert?.alert?.alert_id;
+
+            try {
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        alert_id: alertId,
+                        action: getActionFromOption(option),
+                        auto_approved: autoExecutable
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'requires_approval') {
+                    if (confirm(`此操作需要确认：\n\n${result.risk_description}\n\n是否继续执行？`)) {
+                        await executeAction(option, true);
+                    }
+                    return;
+                }
+
+                alert(result.message);
+                refreshMetrics();
+
+            } catch (e) {
+                console.error('Failed to execute:', e);
+            }
+        }
+
+        function getActionFromOption(option) {
+            const actions = {
+                'A': 'restart_service',
+                'B': 'increase_pool_size',
+                'C': 'rollback_change'
+            };
+            return actions[option] || 'manual';
+        }
+
+        // Copilot 交互
+        async function handleCopilotKeypress(event) {
+            if (event.key === 'Enter') {
+                askCopilot(event.target.value);
+            }
+        }
+
+        async function askCopilot(query) {
+            document.getElementById('copilotInput').value = query;
+
+            try {
+                const response = await fetch('/api/copilot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+
+                const result = await response.json();
+
+                // 显示报告
+                const reportWindow = window.open('', '_blank', 'width=800,height=600');
+                reportWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>AI 报告 - ${query}</title>
+                        <style>
+                            body { font-family: -apple-system, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+                            pre { background: #f5f5f5; padding: 20px; border-radius: 8px; white-space: pre-wrap; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>${query}</h1>
+                        <pre>${result.report}</pre>
+                    </body>
+                    </html>
+                `);
+
+            } catch (e) {
+                console.error('Failed to ask copilot:', e);
+            }
+        }
+    </script>
+</body>
+</html>
